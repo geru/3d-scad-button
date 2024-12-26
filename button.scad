@@ -16,19 +16,20 @@ button_edge_or = button_edge_od / 2;
 
 button_flat_or = button_or - button_edge_or;
 button_thickness = 4;
-button_t = button_thickness - button_edge_or;
+button_t = button_thickness - button_edge_or;        // thickness to center flat
+button_lower_edge_height = button_thickness - button_edge_od;
 echo(button_t, button_edge_or);
 threadhole_od = 2.75;
 
 module button_body() {
   outline = [
-      [                       0,                  button_t,            ],
-      [          button_flat_or-button_edge_od/3,                  button_t,           0 ],
-      [          button_flat_or, button_t + button_edge_or,           button_edge_or/2 ],
-      [               button_or, button_t + button_edge_or,           button_edge_or/2 ],
-      [               button_or, button_t - button_edge_or,           button_edge_or ],
-      [             button_or/2,                         0,           button_od ],
-      [                       0,                         0,            ],
+      [                               0,                  button_t,      ], //      ],
+      [ button_flat_or-button_edge_od/3,                  button_t,      ], //     0 ],
+      [                  button_flat_or, button_t + button_edge_or,     button_edge_or/2 ],
+      [                       button_or, button_t + button_edge_or,     button_edge_or/2 ],
+      [                       button_or, button_lower_edge_height,      button_edge_or ],
+      [ button_or - button_lower_edge_height,                         0,      ], //     button_od ],
+      [                               0,                         0,      ], //      ],
     ];
 
   rotate_extrude()
