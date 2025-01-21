@@ -4,6 +4,7 @@ include <BOSL2/shapes3d.scad>
 include <BOSL2/rounding.scad>
 include <hkern0_scad/BOSL2_utils.scad>
 include <./models.scad>
+
 /*
 MIT NON-AI License
 
@@ -34,6 +35,19 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 $fn = 90;
+
+generate = "default"; // [ default:single, all:all ]
+
+od = 20.25;
+thickness = 3.75;
+edge_od = 2.25;
+margin = 0.25;
+threadhole_n = 4;
+threadhole_od = 1.75;
+threadhole_circle_d = 4.75;
+
+module custom_stopper() {}
+
 IDX_NAME =      0;
 IDX_OD =        1;
 IDX_THICKNESS = 2;
@@ -42,34 +56,20 @@ IDX_MARGIN =    4;
 IDX_TH_N =      5;
 IDX_TH_OD =     6;
 IDX_TH_CIR_D =  7;
-params_data = [
-[ [ "Default", 20.57, 3.2, 2.2, 0.5, 4, 2.0, 5 ],
-  ],
-[ [ "09-a",        9, 1.8, 0.7,   0, 3,  1.5, 2.9 ],
-  [ "09-b", 9, 1.8, 0.7, 1, 3, 1.5, 2.9 ],
-  [ "09-c", 9, 2.3, 1.1, 0.7, 3, 1.5, 3 ],
-  [ "09-d", 9, 2, 0.3, 1.8, 3, 1.5, 2.8 ],
-  [ "09-e", 9, 2.3, 1.1, 0.9, 3, 1.5, 3 ],
-  [ "09-f", 9, 1.3, 0.6, 1.2, 3, 1.5, 3 ],
-  [ "09-g", 9, 2.3, 1.7, 0.5, 3, 1.5, 2.5 ],
-  [ "09-h", 9, 1.6, 1.1, 0.45, 2, 1.5, 3 ],
-  [ "09-i", 9, 1.7, 0.5, 0.45, 4, 1.5, 3.5 ],
-  [ "09-j", 9, 1.8, 1.5, 0.2, 3, 1.5, 3 ],
-  [ "09-k", 9, 2.9, 1.5, 0.225, 3, 1.75, 3.3 ],
-  ],
-  ];
+params_data = (generate == "default")
+  ? [ [["Default", od, thickness, edge_od, margin, threadhole_n, threadhole_od, threadhole_circle_d],
+      ],]
+  : models();
 
 
 module non_custom() {}
 
-module button( params ) {
-  od = params[IDX_OD];
-  thickness = params[IDX_THICKNESS];
-  edge_od = params[IDX_EDGE_OD];
-  margin = params[IDX_MARGIN];
-  threadhole_n = params[IDX_TH_N];
-  threadhole_od = params[IDX_TH_OD];
-  threadhole_circle_d = params[IDX_TH_CIR_D];
+module button( od=od, thickness=thickness, edge_od=edge_od, margin=margin, threadhole_n=threadhole_n, threadhole_od=threadhole_od, threadhole_circle_d=threadhole_circle_d ) {
+  if( generate == "default" ) {
+    output_string = str( "\n[ \"", od, "-", thickness, "-", edge_od, "-", margin, "-", threadhole_n, ":", threadhole_od, ":", threadhole_circle_d, "\", ",
+od, ", ", thickness, ", ", edge_od, ", ", margin, ", ", threadhole_n, ", ", threadhole_od, ", ", threadhole_circle_d, " ],\n");
+    echo(output_string);
+  }
   or = od / 2;
   edge_or=edge_od / 2;
   flat_or=or - edge_or - margin;
@@ -105,8 +105,18 @@ module button_set( params, offset=0 ) {
   spacing = 5;
   for( i = [0 : len(params)-1] )
     translate([offset, i*(params[i][IDX_OD]+spacing), 0])
-      button(params[i]);
+      button( params[i][IDX_OD],
+              params[i][IDX_THICKNESS],
+              params[i][IDX_EDGE_OD],
+              params[i][IDX_MARGIN],
+              params[i][IDX_TH_N],
+              params[i][IDX_TH_OD],
+              params[i][IDX_TH_CIR_D] );
 }
 
-for( i = [0 : len(params_data)-1] )
-  button_set(params_data[i], i * (25));
+if( generate == "default" ) {
+  button();
+} else {
+  for ( i=[0 : len( params_data ) - 1] )
+  button_set( params_data[i], i * (25) );
+}
