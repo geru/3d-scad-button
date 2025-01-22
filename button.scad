@@ -36,7 +36,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 $fn = 90;
 
-generate = "default"; // [ default:single, all:all ]
+generate = 0; // [ 0:sample, 1:9mm, 2:11mm, 3:13mm, 4:17mm, -1:all ]
 
 od = 20.25;
 thickness = 3.75;
@@ -65,7 +65,7 @@ params_data = (generate == "default")
 module non_custom() {}
 
 module button( od=od, thickness=thickness, edge_od=edge_od, margin=margin, threadhole_n=threadhole_n, threadhole_od=threadhole_od, threadhole_circle_d=threadhole_circle_d ) {
-  if( generate == "default" ) {
+  if( !generate ) {
     output_string = str( "\n[ \"", od, "-", thickness, "-", edge_od, "-", margin, "-", threadhole_n, ":", threadhole_od, ":", threadhole_circle_d, "\", ",
 od, ", ", thickness, ", ", edge_od, ", ", margin, ", ", threadhole_n, ", ", threadhole_od, ", ", threadhole_circle_d, " ],\n");
     echo(output_string);
@@ -114,9 +114,10 @@ module button_set( params, offset=0 ) {
               params[i][IDX_TH_CIR_D] );
 }
 
-if( generate == "default" ) {
+if( !generate ) {
   button();
 } else {
-  for ( i=[0 : len( params_data ) - 1] )
-  button_set( params_data[i], i * (25) );
+  for ( i=[1 : len( params_data )] )
+    if( (generate < 0) || (i == generate) )
+      button_set( params_data[i-1], (i-1) * (25) );
 }
